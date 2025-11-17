@@ -23,6 +23,8 @@
       <p>¡Recoge las manzanas (🍎) y llévalas al Árbol (🌳)!</p>
       <p>¡Esquiva a los fantasmas (👻)!</p>
       <p>Usa las <strong>flechas del teclado</strong> (← ↑ → ↓) para moverte.</p>
+      <p>¡Busca el Reloj (⏳) para ralentizar a los fantasmas!</p>
+      <p>¡Busca el Corazón (💖) para recuperar una vida!</p>
       <button id="btn-cerrar-ayuda">Volver</button>
     </div>
   </div>
@@ -33,10 +35,10 @@
     <button id="btn-salir-juego">Salir al Menú</button>
   </div>
   
-  <!-- CAMBIO: "Puntuación" -> "Puntos" -->
   <div id="hud" class="hidden">
     <div>🏆 Puntos: <span id="score-display">0</span></div>
     <div>🍎 Manzanas: <span id="apples-collected">0</span>/<span id="required-apples">5</span></div>
+    <div>⏳ Tiempo: <span id="timer-display">60</span>s</div>
     <div>⭐ Nivel: <span id="current-level">1</span></div>
     <div>❤️ Vidas: <span id="lives">3</span></div>
   </div>
@@ -68,4 +70,3 @@
   <script src="game.js" defer></script>
 </body>
 </html>
-

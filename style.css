@@ -97,7 +97,7 @@ h1 {
   z-index: 10;
 }
 
-.apple {
+.apple, .power-up {
   position: absolute;
   font-size: 30px;
   animation: float 2s ease-in-out infinite;
@@ -106,19 +106,26 @@ h1 {
   transition: transform 0.3s ease-out, opacity 0.3s ease-out;
 }
 
-.apple.collected {
+.apple.collected, .power-up.collected {
   animation: none;
   transform: scale(1.5);
   opacity: 0;
 }
 
+/* Estilo específico para el enemigo ralentizado */
 .enemy {
   position: absolute;
   font-size: 35px;
   z-index: 9;
   text-shadow: none;
-  transition: transform 0.2s;
+  transition: transform 0.2s, opacity 0.3s;
 }
+
+.enemy.slowed {
+  opacity: 0.5; /* Hace que se vea visualmente más lento */
+  filter: hue-rotate(180deg); /* Cambio de color para indicar lentitud */
+}
+
 
 @keyframes float {
   0% { transform: translateY(0px); }
@@ -307,4 +314,3 @@ h1 {
   50% { opacity: 0.1; }
   100% { opacity: 1; }
 }
-

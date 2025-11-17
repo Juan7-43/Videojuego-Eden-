@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const requiredApplesText = document.getElementById("required-apples");
   const currentLevelText = document.getElementById("current-level");
   const livesText = document.getElementById("lives");
+  const timerDisplayText = document.getElementById("timer-display"); 
 
   // Controles
   const gameControls = document.getElementById("game-controls");
@@ -40,10 +41,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- 2. Variables del Juego ---
   const MAX_LEVELS = 5;
+  // Constantes para Power-ups y Temporización
+  const POWER_UP_SLOW_DURATION = 5000; // 5 segundos de duración del efecto
+  const POWER_UP_CHANCE = 0.3; // 30% de probabilidad de generar un power-up
+  const INITIAL_TIME_PER_LEVEL = 60; // 60 segundos base
+  
   let currentLevel = 1;
   let totalApples = 5;
   let apples = [];
   let enemies = [];
+  let powerUps = []; 
   let lives = 3;
   
   let score = 0;
@@ -56,8 +63,39 @@ document.addEventListener("DOMContentLoaded", () => {
   let gameActive = false;
   let isPaused = false;
   let isInvincible = false;
-  let gameLoopId;
+  let isEnemiesSlowed = false; 
+  let timerSlowedFactor = 1; // Factor de ralentización del tiempo: 1 = normal, 0.2 = 5 veces más lento
 
+  let gameLoopId;
+  let timerIntervalId;
+  let timeLeft = INITIAL_TIME_PER_LEVEL;
+  
+  // Función auxiliar para detener y reiniciar el temporizador con un nuevo intervalo
+  function stopAndRestartTimer(interval) {
+    clearInterval(timerIntervalId);
+    if (!isPaused && gameActive) {
+      // El intervalo pasado (en milisegundos) determina la velocidad real del contador
+      timerIntervalId = setInterval(updateTimerLogic, interval);
+    }
+  }
+  
+  // Función principal de lógica del temporizador (resta 1 segundo de tiempo de juego)
+  function updateTimerLogic() {
+      if (isPaused || !gameActive) return;
+
+      timeLeft--;
+      timerDisplayText.textContent = timeLeft;
+
+      if (timeLeft <= 0) {
+          clearInterval(timerIntervalId);
+          showGameOver("¡Se acabó el tiempo!", `Puntuación Final: ${score}`);
+      } else if (timeLeft <= 10) {
+          timerDisplayText.style.color = "red";
+      } else {
+          timerDisplayText.style.color = "white";
+      }
+  }
+  
   // --- 3. Funciones Principales (Menú y Estado) ---
   
   function startGame(level) {
@@ -65,8 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
     isPaused = false;
     currentLevel = level;
     
+    // Configuración por nivel
     totalApples = 5 + (currentLevel - 1) * 2;
     playerSpeed = 18 + (currentLevel * 2);
+    timeLeft = INITIAL_TIME_PER_LEVEL + (currentLevel - 1) * 10; // Más tiempo por nivel
     
     resetLevelState(); 
     
@@ -81,16 +121,22 @@ document.addEventListener("DOMContentLoaded", () => {
     
     spawnApples();
     spawnEnemies(currentLevel);
+    spawnPowerUps(); 
     
     movePlayer(); 
 
+    // Iniciar Game Loop
     clearInterval(gameLoopId);
     gameLoopId = setInterval(gameLoop, 1000 / 60);
+
+    // Iniciar Temporizador a velocidad normal (1000ms = 1s)
+    stopAndRestartTimer(1000); 
   }
 
   function showMainMenu() {
     gameActive = false;
     clearInterval(gameLoopId);
+    clearInterval(timerIntervalId); 
     
     hud.classList.add("hidden");
     game.classList.add("hidden");
@@ -101,27 +147,19 @@ document.addEventListener("DOMContentLoaded", () => {
     
     mainMenu.classList.remove("hidden");
   }
-
-  function showHelpMenu() {
-    mainMenu.classList.add("hidden");
-    helpMenu.classList.remove("hidden");
-  }
   
-  function hideHelpMenu() {
-    helpMenu.classList.add("hidden");
-    mainMenu.classList.remove("hidden");
-  }
-
-  // --- Funciones de Control ---
   function togglePause() {
     isPaused = !isPaused;
     
     if (isPaused) {
       pauseOverlay.classList.remove("hidden");
       btnPause.textContent = "Reanudar";
+      clearInterval(timerIntervalId); 
     } else {
       pauseOverlay.classList.add("hidden");
       btnPause.textContent = "Pausar";
+      // Reanudar el temporizador a la velocidad actual (normal o lenta)
+      stopAndRestartTimer(1000 / timerSlowedFactor);
     }
   }
 
@@ -129,18 +167,10 @@ document.addEventListener("DOMContentLoaded", () => {
     gameActive = true;
     isPaused = false;
     
-    message.style.display = "none"; // Corrige el error de "Jugar de Nuevo"
+    // Restablecer el tiempo antes de llamar a startGame para recalcular el tiempo del nivel
+    timeLeft = INITIAL_TIME_PER_LEVEL + (currentLevel - 1) * 10;
     
-    pauseOverlay.classList.add("hidden");
-    btnPause.textContent = "Pausar";
-    
-    resetLevelState();
-    spawnApples();
-    spawnEnemies(currentLevel);
-    movePlayer();
-    
-    clearInterval(gameLoopId);
-    gameLoopId = setInterval(gameLoop, 1000 / 60);
+    startGame(currentLevel); // Reutilizamos startGame
   }
   
   function resetLevelState() {
@@ -148,6 +178,9 @@ document.addEventListener("DOMContentLoaded", () => {
     applesCollected = 0;
     lives = 3;
     isInvincible = false;
+    isEnemiesSlowed = false; 
+    timerSlowedFactor = 1; // Asegurar que el tiempo es normal al iniciar
+
     player.classList.remove("blinking");
     
     scoreDisplayText.textContent = score;
@@ -156,6 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
     livesText.textContent = lives;
     requiredApplesText.textContent = totalApples;
     currentLevelText.textContent = currentLevel;
+    timerDisplayText.textContent = timeLeft; 
     
     posX = 20;
     posY = 20; 
@@ -165,7 +199,10 @@ document.addEventListener("DOMContentLoaded", () => {
     apples = [];
     document.querySelectorAll(".enemy").forEach(e => e.remove());
     enemies = [];
+    document.querySelectorAll(".power-up").forEach(pu => pu.remove()); 
+    powerUps = [];
   }
+
 
   // --- Game Loop ---
   function gameLoop() {
@@ -175,6 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
     moveEnemies();
     checkAppleCollision();
     checkEnemyCollision();
+    checkPowerUpCollision(); 
     checkWin();
   }
 
@@ -196,8 +234,61 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
+  function spawnPowerUps() {
+    powerUps = [];
+    
+    // Decidir cuántos power-ups generar (uno o dos)
+    if (Math.random() < POWER_UP_CHANCE * 2) { 
+        powerUps.push(createPowerUp("slow")); // Reloj
+    }
+    if (lives < 5 && Math.random() < POWER_UP_CHANCE) {
+        powerUps.push(createPowerUp("life")); // Corazón (máx. 5 vidas)
+    }
+
+    powerUps.forEach(pu => {
+      let puX, puY;
+      let isOverlap;
+      
+      do {
+        isOverlap = false;
+        puX = Math.random() * (game.clientWidth - 50); 
+        puY = Math.random() * (game.clientHeight - 50); 
+
+        if (apples.some(apple => {
+            const appleX = parseFloat(apple.style.left);
+            const appleY = parseFloat(apple.style.top);
+            return Math.abs(puX - appleX) < 50 && Math.abs(puY - appleY) < 50;
+        })) {
+            isOverlap = true;
+        }
+      } while (isOverlap);
+
+      pu.element.style.left = puX + "px";
+      pu.element.style.top = puY + "px";
+      game.appendChild(pu.element);
+    });
+  }
+
+  function createPowerUp(type) {
+    const pu = document.createElement("div");
+    pu.classList.add("power-up");
+    let symbol, effect;
+
+    if (type === "slow") {
+      symbol = "⏳";
+      effect = "slow";
+      pu.style.fontSize = "40px";
+    } else if (type === "life") {
+      symbol = "💖";
+      effect = "life";
+      pu.style.fontSize = "35px";
+    }
+
+    pu.textContent = symbol;
+    return { element: pu, type: effect };
+  }
+
   function spawnEnemies(level) {
-    // CAMBIO: Nivel 1 = 1 fantasma, Nivel 2 = 2 fantasmas...
     let enemyCount = level; 
     
     for (let i = 0; i < enemyCount; i++) {
@@ -208,15 +299,14 @@ document.addEventListener("DOMContentLoaded", () => {
       enemy.style.left = (Math.random() * (game.clientWidth - 200) + 150) + "px"; 
       enemy.style.top = (Math.random() * (game.clientHeight - 100)) + "px";
       
-      enemy.speed = 0.8 + (level * 0.4); // Velocidad lenta
+      enemy.initialSpeed = 0.8 + (level * 0.4); // Velocidad base
+      enemy.speed = enemy.initialSpeed;
       
       enemy.directionX = Math.random() < 0.5 ? 1 : -1;
       
       if (level > 1) {
-        // Nivel 2 y superior: movimiento en todas direcciones
         enemy.directionY = Math.random() < 0.5 ? 1 : -1;
       } else {
-        // Nivel 1: solo movimiento horizontal
         enemy.directionY = 0;
       }
       
@@ -226,13 +316,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   function moveEnemies() {
+    const speedFactor = isEnemiesSlowed ? 0.2 : 1; // 20% de la velocidad normal
+    
     enemies.forEach(enemy => {
       let currentLeft = parseFloat(enemy.style.left);
       let currentTop = parseFloat(enemy.style.top);
       
-      let newLeft = currentLeft + (enemy.speed * enemy.directionX);
-      let newTop = currentTop + (enemy.speed * enemy.directionY);
+      let newLeft = currentLeft + (enemy.initialSpeed * enemy.directionX * speedFactor);
+      let newTop = currentTop + (enemy.initialSpeed * enemy.directionY * speedFactor);
 
+      if (isEnemiesSlowed) {
+        enemy.classList.add("slowed");
+      } else {
+        enemy.classList.remove("slowed");
+      }
+      
       // Rebotar en bordes horizontales
       if (newLeft <= 0 || newLeft >= (game.clientWidth - 35)) {
         enemy.directionX *= -1;
@@ -257,7 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function checkAppleCollision() {
     const playerRect = player.getBoundingClientRect();
     apples.forEach((apple, index) => {
-      if (!apple) return; // Ya está siendo recogida
+      if (!apple) return; 
       
       const appleRect = apple.getBoundingClientRect();
       if (
@@ -266,7 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
         playerRect.top < appleRect.bottom &&
         playerRect.bottom > appleRect.top
       ) {
-        apples[index] = null; // Marcar para que no se vuelva a colisionar
+        apples[index] = null; 
         
         applesCollected++;
         score += 100;
@@ -274,9 +372,8 @@ document.addEventListener("DOMContentLoaded", () => {
         applesCollectedText.textContent = applesCollected;
         scoreDisplayText.textContent = score;
         
-        apple.classList.add("collected"); // Activar animación CSS
+        apple.classList.add("collected"); 
         
-        // Quitar del DOM después de la animación
         setTimeout(() => {
           apple.remove(); 
         }, 300);
@@ -286,6 +383,63 @@ document.addEventListener("DOMContentLoaded", () => {
     apples = apples.filter(a => a !== null);
   }
   
+  function checkPowerUpCollision() {
+    const playerRect = player.getBoundingClientRect();
+    powerUps.forEach((puObj, index) => {
+      if (!puObj) return; 
+      
+      const puElement = puObj.element;
+      const puRect = puElement.getBoundingClientRect();
+      
+      if (
+        playerRect.left < puRect.right &&
+        playerRect.right > puRect.left &&
+        playerRect.top < puRect.bottom &&
+        playerRect.bottom > puRect.top
+      ) {
+        powerUps[index] = null; 
+        
+        puElement.classList.add("collected");
+        
+        applyPowerUpEffect(puObj.type); 
+        
+        setTimeout(() => {
+          puElement.remove(); 
+        }, 300);
+      }
+    });
+    
+    powerUps = powerUps.filter(pu => pu !== null);
+  }
+
+  function applyPowerUpEffect(type) {
+    if (type === "slow") {
+      isEnemiesSlowed = true; // 1. Ralentiza enemigos
+      
+      // 2. Ralentizar el temporizador (Intervalo de 5000ms = 5s)
+      timerSlowedFactor = 0.2;
+      stopAndRestartTimer(1000 / timerSlowedFactor); 
+
+      // Desactivar el efecto después de 5 segundos
+      setTimeout(() => {
+        isEnemiesSlowed = false;
+        
+        // Restaurar el temporizador a la velocidad normal (1000ms = 1s)
+        timerSlowedFactor = 1;
+        if (!isPaused && gameActive) {
+            stopAndRestartTimer(1000); 
+        }
+        
+      }, POWER_UP_SLOW_DURATION);
+      
+    } else if (type === "life") {
+      if (lives < 5) { 
+        lives++;
+        livesText.textContent = lives;
+      }
+    }
+  }
+
   function checkEnemyCollision() {
     if (isInvincible) return;
 
@@ -309,7 +463,7 @@ document.addEventListener("DOMContentLoaded", () => {
     lives--;
     livesText.textContent = lives;
     
-    score = Math.max(0, score - 50); // Restar 50 puntos
+    score = Math.max(0, score - 50); 
     scoreDisplayText.textContent = score;
     
     isInvincible = true;
@@ -318,10 +472,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       isInvincible = false;
       player.classList.remove("blinking");
-    }, 2000); // 2 segundos de invencibilidad
+    }, 2000); 
 
     if (lives <= 0) {
-      showGameOver();
+      showGameOver("GAME OVER", `¡Los fantasmas te atraparon! Puntuación Final: ${score}`);
     } else {
       posX = 20;
       posY = 20;
@@ -329,12 +483,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  function showGameOver() {
+  function showGameOver(title, text) {
     gameActive = false;
+    clearInterval(gameLoopId);
+    clearInterval(timerIntervalId); 
+
     message.style.display = "flex";
-    messageTitle.textContent = "GAME OVER";
+    messageTitle.textContent = title;
     messageTitle.className = "game-over-title";
-    messageText.textContent = `¡Los fantasmas te atraparon! Puntuación Final: ${score}`;
+    messageText.textContent = text;
     
     nextLevelBtn.classList.add("hidden");
     restartLevelBtn.classList.remove("hidden");
@@ -352,13 +509,16 @@ document.addEventListener("DOMContentLoaded", () => {
       playerRect.bottom > treeRect.top
     ) {
       gameActive = false;
+      clearInterval(gameLoopId);
+      clearInterval(timerIntervalId); 
+
       message.style.display = "flex";
       messageTitle.className = "";
       restartLevelBtn.classList.add("hidden");
 
       if (currentLevel < MAX_LEVELS) {
         messageTitle.textContent = "¡Nivel Completado!";
-        messageText.textContent = `¡Nivel ${currentLevel} superado! Puntuación: ${score}`;
+        messageText.textContent = `¡Nivel ${currentLevel} superado! Te sobraron ${timeLeft} segundos. Puntuación: ${score}`;
         nextLevelBtn.classList.remove("hidden");
       } else {
         messageTitle.textContent = "🎉 ¡Felicidades! 🎉";
@@ -370,11 +530,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- 5. Event Listeners (Controladores) ---
   
+  function showHelpMenu() {
+    mainMenu.classList.add("hidden");
+    helpMenu.classList.remove("hidden");
+  }
+  
+  function hideHelpMenu() {
+    helpMenu.classList.add("hidden");
+    mainMenu.classList.remove("hidden");
+  }
+
   btnJugar.addEventListener("click", () => startGame(1));
   btnAyuda.addEventListener("click", showHelpMenu);
   btnCerrarAyuda.addEventListener("click", hideHelpMenu);
   btnSalir.addEventListener("click", () => {
-    alert("¡Gracias por jugar! Cierra la pestaña para salir.");
+    console.log("¡Gracias por jugar! Cierra la pestaña para salir.");
   });
 
   btnPause.addEventListener("click", togglePause);
@@ -386,6 +556,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("keydown", (e) => {
     if (!gameActive || isPaused) {
+      if (e.key === "p" || e.key === "P") {
+        togglePause();
+      }
       return;
     }
     
@@ -404,10 +577,13 @@ document.addEventListener("DOMContentLoaded", () => {
         posX = Math.min(game.clientWidth - 50, posX + playerSpeed);
         player.style.transform = "scaleX(1)";
         break;
+      case "p":
+      case "P":
+        togglePause();
+        break;
     }
     movePlayer();
   });
 
   showMainMenu();
 });
-
