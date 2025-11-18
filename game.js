@@ -173,10 +173,11 @@ document.addEventListener("DOMContentLoaded", () => {
     startGame(currentLevel); // Reutilizamos startGame
   }
   
+  // FUNCIÓN MODIFICADA: Ahora la vida se reinicia a 3 al inicio de cada nivel
   function resetLevelState() {
     score = 0;
     applesCollected = 0;
-    lives = 3;
+    lives = 3; // <<<<< MODIFICACIÓN: Siempre 3 vidas al inicio del nivel
     isInvincible = false;
     isEnemiesSlowed = false; 
     timerSlowedFactor = 1; // Asegurar que el tiempo es normal al iniciar
@@ -234,30 +235,60 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
+  // FUNCIÓN MODIFICADA: Aparecen siempre y se duplican en niveles altos
   function spawnPowerUps() {
     powerUps = [];
     
-    // Decidir cuántos power-ups generar (uno o dos)
-    if (Math.random() < POWER_UP_CHANCE * 2) { 
-        powerUps.push(createPowerUp("slow")); // Reloj
+    // Determinar la cantidad de power-ups a generar
+    let slowCount = 1;
+    let lifeCount = 1;
+    
+    // Lógica para duplicar en niveles "difíciles" (3, 4, 5)
+    if (currentLevel >= 3) {
+        slowCount = 2; 
+        lifeCount = 2;
     }
-    if (lives < 5 && Math.random() < POWER_UP_CHANCE) {
-        powerUps.push(createPowerUp("life")); // Corazón (máx. 5 vidas)
+    
+    // Generar Reloj (slow)
+    for (let i = 0; i < slowCount; i++) {
+        powerUps.push(createPowerUp("slow"));
     }
-
+    
+    // Generar Corazón (life) - siempre que no se exceda el máximo de 5 vidas si ya se recogieron vidas
+    // Nota: Aunque el estado del nivel se reinicia, la vida se recupera durante el juego.
+    // Usaremos un límite en la cantidad de power-ups de vida generados para no saturar.
+    if (lives < 5) {
+        let actualLifeCount = Math.min(lifeCount, 5 - lives); // No generar más de lo que se puede usar
+        for (let i = 0; i < actualLifeCount; i++) {
+            powerUps.push(createPowerUp("life"));
+        }
+    }
+    
+    // Colocar los power-ups en el tablero
     powerUps.forEach(pu => {
       let puX, puY;
       let isOverlap;
       
       do {
         isOverlap = false;
-        puX = Math.random() * (game.clientWidth - 50); 
-        puY = Math.random() * (game.clientHeight - 50); 
-
+        
+        // Regla: Forzar una posición inicial alejada del jugador (cerca de 0,0)
+        const minDistance = 150; 
+        
+        puX = minDistance + Math.random() * (game.clientWidth - minDistance - 50); 
+        puY = minDistance + Math.random() * (game.clientHeight - minDistance - 50); 
+        
+        // Evitar superposición con manzanas o con otros power-ups
         if (apples.some(apple => {
             const appleX = parseFloat(apple.style.left);
             const appleY = parseFloat(apple.style.top);
             return Math.abs(puX - appleX) < 50 && Math.abs(puY - appleY) < 50;
+        }) || powerUps.some(existingPu => {
+            if (existingPu === pu) return false;
+            const existingPuX = parseFloat(existingPu.element.style.left);
+            const existingPuY = parseFloat(existingPu.element.style.top);
+            // Comprobar solapamiento entre power-ups
+            return existingPu.element && Math.abs(puX - existingPuX) < 50 && Math.abs(puY - existingPuY) < 50;
         })) {
             isOverlap = true;
         }
