@@ -21,10 +21,10 @@
     <div class="menu-card">
       <h2>Ayuda</h2>
       <p>¡Recoge las manzanas (🍎) y llévalas al Árbol (🌳)!</p>
-      <p>¡Esquiva a los fantasmas (👻)!</p>
+      <p>¡El Árbol brillará cuando tengas todas!</p>
+      <p>Esquiva a los fantasmas (👻).</p>
       <p>Usa las <strong>flechas del teclado</strong> (← ↑ → ↓) para moverte.</p>
-      <p>¡Busca el Reloj (⏳) para ralentizar a los fantasmas!</p>
-      <p>¡Busca el Corazón (💖) para recuperar una vida!</p>
+      <p>¡Busca el Reloj (⏳) para ralentizar y el Corazón (💖) para vidas!</p>
       <button id="btn-cerrar-ayuda">Volver</button>
     </div>
   </div>
@@ -33,6 +33,11 @@
     <button id="btn-pause">Pausar</button>
     <button id="btn-restart-game">Reiniciar Nivel</button>
     <button id="btn-salir-juego">Salir al Menú</button>
+    
+    <div class="audio-controls">
+      <button id="btn-mute" title="Silenciar Música">🔊</button>
+      <input type="range" id="volumen-slider" min="0" max="1" step="0.1" value="0.5" title="Volumen">
+    </div>
   </div>
   
   <div id="hud" class="hidden">
@@ -44,8 +49,7 @@
   </div>
 
   <div id="game" class="hidden">
-    <div id="player"></div>
-    <div id="tree"></div>
+    <div id="player"></div> <div id="tree"></div>
     
     <div id="message">
       <h2 id="message-title"></h2>
@@ -61,12 +65,13 @@
   </div>
 
   <ul class="copyright">
-								<li style="
-								font-size: 0.8em;
-								text-align: center;
-                color: rgba(255, 255, 255, 0.7);
-								padding: 15px;">&copy;Todos los derechos reservado a Juan Elias Cruz Cabrera 1-23-7038</li>
-							</ul>
+    <li style="
+    font-size: 0.8em;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 15px;">&copy;Todos los derechos reservado </li>
+  </ul>
+  
   <script src="game.js" defer></script>
 </body>
 </html>

@@ -9,6 +9,7 @@
 }
 
 body {
+  /* El fondo base es el del menú principal. Cambiará dinámicamente en JS */
   background: linear-gradient(to bottom, #9be15d, #00e3ae);
   display: flex;
   flex-direction: column;
@@ -18,6 +19,7 @@ body {
   color: #fff;
   overflow: hidden;
   text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+  transition: background 1s ease; /* Transición suave para cambio de ambiente */
 }
 
 h1 {
@@ -31,8 +33,10 @@ h1 {
 /* --- Controles del Juego --- */
 #game-controls {
   display: flex;
-  justify-content: space-around;
-  width: 800px;
+  justify-content: center; /* Centrado */
+  align-items: center;
+  gap: 10px;
+  width: 900px; /* Más ancho para acomodar audio */
   margin-top: 10px;
 }
 
@@ -46,25 +50,55 @@ h1 {
   box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
   font-size: 0.8em;
 }
-#game-controls button:hover {
-  background: #e0a800;
-}
-#btn-salir-juego {
-  background: #dc3545;
-  color: #fff;
-}
-#btn-salir-juego:hover {
-  background: #c82333;
+#game-controls button:hover { background: #e0a800; }
+#btn-salir-juego { background: #dc3545; color: #fff; }
+#btn-salir-juego:hover { background: #c82333; }
+
+/* --- NUEVO: Estilos de Audio --- */
+.audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,0,0,0.3);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.2);
 }
 
+#btn-mute {
+  background: #17a2b8 !important; /* Color azul cian */
+  color: #fff !important;
+  min-width: 45px;
+  display: flex;
+  justify-content: center;
+}
+#btn-mute:hover { background: #138496 !important; }
 
-/* --- Estilos del Juego --- */
+#volumen-slider {
+  cursor: pointer;
+  width: 100px;
+  height: 8px;
+  border-radius: 5px;
+  background: #d3d3d3;
+  outline: none;
+  -webkit-appearance: none;
+}
+#volumen-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #28a745;
+  cursor: pointer;
+}
+
+/* --- Estilos del Juego (HUD y Tablero) --- */
 #hud {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 800px;
-  /* CAMBIO: Fuente más pequeña para que quepa en una línea */
   font-size: 1.1em; 
   margin-top: 10px;
   text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
@@ -82,9 +116,12 @@ h1 {
   overflow: hidden;
   box-shadow: 0 0 20px rgba(0,0,0,0.4);
   margin-top: 10px;
-  background-color: #a8e6cf;
+  /* Fondo semitransparente con efecto blur para ver el ambiente detrás */
+  background-color: rgba(255, 255, 255, 0.15); 
+  backdrop-filter: blur(3px); 
 }
 
+/* JUGADOR COMO IMAGEN PNG (Original) */
 #player {
   position: absolute;
   width: 50px;
@@ -97,6 +134,7 @@ h1 {
   z-index: 10;
 }
 
+/* Elementos del juego */
 .apple, .power-up {
   position: absolute;
   font-size: 30px;
@@ -105,14 +143,12 @@ h1 {
   text-shadow: none;
   transition: transform 0.3s ease-out, opacity 0.3s ease-out;
 }
-
 .apple.collected, .power-up.collected {
   animation: none;
   transform: scale(1.5);
   opacity: 0;
 }
 
-/* Estilo específico para el enemigo ralentizado */
 .enemy {
   position: absolute;
   font-size: 35px;
@@ -120,12 +156,10 @@ h1 {
   text-shadow: none;
   transition: transform 0.2s, opacity 0.3s;
 }
-
 .enemy.slowed {
-  opacity: 0.5; /* Hace que se vea visualmente más lento */
-  filter: hue-rotate(180deg); /* Cambio de color para indicar lentitud */
+  opacity: 0.5; 
+  filter: hue-rotate(180deg); 
 }
-
 
 @keyframes float {
   0% { transform: translateY(0px); }
@@ -133,6 +167,7 @@ h1 {
   100% { transform: translateY(0px); }
 }
 
+/* --- NUEVO: Estilos del Árbol Mejorado --- */
 #tree {
   position: absolute;
   width: 100px;
@@ -142,8 +177,23 @@ h1 {
   background: url('https://www.opengameart.org/sites/default/files/tree_0.png') center/cover;
   image-rendering: pixelated;
   z-index: 8;
+  /* Animación suave para crecimiento y brillo */
+  transition: transform 0.5s, filter 0.5s; 
+  transform-origin: bottom center; /* Crece hacia arriba */
 }
 
+/* Clase que se activa cuando tienes todas las manzanas */
+#tree.tree-ready {
+  filter: drop-shadow(0 0 15px #ffd700) brightness(1.3); /* Brillo dorado */
+  animation: treePulse 0.8s infinite alternate; /* Latido */
+}
+
+@keyframes treePulse {
+  0% { transform: scale(1); } /* El JS define la escala base */
+  100% { transform: scale(1.1); } /* Aumenta un 10% al latir */
+}
+
+/* --- Mensajes y Menús --- */
 #message {
   position: absolute;
   width: 100%;
@@ -160,7 +210,6 @@ h1 {
   z-index: 20;
   padding: 20px;
 }
-
 #message h2 {
   font-size: 2.5em;
   margin-bottom: 20px;
@@ -172,12 +221,7 @@ h1 {
   text-shadow: 3px 3px 0px #5e0000;
 }
 
-
-#message p {
-  font-size: 1.2em;
-  margin-bottom: 30px;
-  line-height: 1.5;
-}
+#message p { font-size: 1.2em; margin-bottom: 30px; line-height: 1.5; }
 
 #message button {
   padding: 12px 25px;
@@ -191,22 +235,12 @@ h1 {
   margin: 10px;
   min-width: 200px;
 }
-#message button:hover {
-  background: #218838;
-}
-#restart-level-btn {
-  background: #ffc107;
-  color: #333;
-}
-#restart-level-btn:hover {
-  background: #e0a800;
-}
-
+#message button:hover { background: #218838; }
+#restart-level-btn { background: #ffc107; color: #333; }
+#restart-level-btn:hover { background: #e0a800; }
 
 /* --- Estilos de Menús --- */
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
 
 .overlay {
   position: fixed;
@@ -240,7 +274,6 @@ h1 {
   text-shadow: 4px 4px 0px rgba(0,0,0,0.5);
 }
 
-
 #main-menu h1 {
   font-size: 4em;
   margin: 0;
@@ -263,7 +296,6 @@ h1 {
   min-width: 250px;
   box-shadow: 3px 3px 0px rgba(0,0,0,0.5);
 }
-
 .menu-buttons button:hover {
   background: #218838;
   transform: scale(1.08);
@@ -277,19 +309,8 @@ h1 {
   box-shadow: 0 5px 25px rgba(0,0,0,0.5);
   text-align: center;
 }
-
-.menu-card h2 {
-  font-size: 3em;
-  margin-bottom: 25px;
-  color: #2a572a;
-}
-
-.menu-card p {
-  font-size: 1.3em;
-  margin-bottom: 30px;
-  line-height: 1.6;
-}
-
+.menu-card h2 { font-size: 3em; margin-bottom: 25px; color: #2a572a; }
+.menu-card p { font-size: 1.3em; margin-bottom: 30px; line-height: 1.6; }
 .menu-card button {
   padding: 15px 30px;
   border: none;
@@ -300,15 +321,9 @@ h1 {
   font-size: 1.1em;
   transition: background 0.3s;
 }
+.menu-card button:hover { background: #218838; }
 
-.menu-card button:hover {
-  background: #218838;
-}
-
-.blinking {
-  animation: parpadeo 0.2s linear 10; /* 0.2s * 10 = 2 segundos */
-}
-
+.blinking { animation: parpadeo 0.2s linear 10; }
 @keyframes parpadeo {
   0% { opacity: 1; }
   50% { opacity: 0.1; }
