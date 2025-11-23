@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>🌳 El Huerto del Edén</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="main-menu" class="overlay">
+    <h1>🌿 Edén</h1>
+    <div class="menu-buttons">
+      <button id="btn-jugar">Jugar</button>
+      <button id="btn-ayuda">Ayuda</button>
+      <button id="btn-salir">Salir</button>
+    </div>
+  </div>
+
+  <div id="help-menu" class="overlay hidden">
+    <div class="menu-card">
+      <h2>Ayuda</h2>
+      <p>¡Recoge las manzanas (🍎) y llévalas al Árbol (🌳)!</p>
+      <p>¡El Árbol brillará cuando tengas todas!</p>
+      <p>Esquiva a los fantasmas (👻).</p>
+      <p>Usa las <strong>flechas del teclado</strong> (← ↑ → ↓) para moverte.</p>
+      <p>¡Busca el Reloj (⏳) para ralentizar y el Corazón (💖) para vidas!</p>
+      <button id="btn-cerrar-ayuda">Volver</button>
+    </div>
+  </div>
+
+  <div id="game-controls" class="hidden">
+    <button id="btn-pause">Pausar</button>
+    <button id="btn-restart-game">Reiniciar Nivel</button>
+    <button id="btn-salir-juego">Salir al Menú</button>
+    
+    <div class="audio-controls">
+      <button id="btn-mute" title="Silenciar Música">🔊</button>
+      <input type="range" id="volumen-slider" min="0" max="1" step="0.1" value="0.5" title="Volumen">
+    </div>
+  </div>
+  
+  <div id="hud" class="hidden">
+    <div>🏆 Puntos: <span id="score-display">0</span></div>
+    <div>🍎 Manzanas: <span id="apples-collected">0</span>/<span id="required-apples">5</span></div>
+    <div>⏳ Tiempo: <span id="timer-display">60</span>s</div>
+    <div>⭐ Nivel: <span id="current-level">1</span></div>
+    <div>❤️ Vidas: <span id="lives">3</span></div>
+  </div>
+
+  <div id="game" class="hidden">
+    <div id="player"></div> <div id="tree"></div>
+    
+    <div id="message">
+      <h2 id="message-title"></h2>
+      <p id="message-text"></p>
+      <button id="next-level-btn" class="hidden">Siguiente Nivel</button>
+      <button id="restart-level-btn" class="hidden">Jugar de Nuevo</button>
+      <button id="restart">Volver al Menú</button>
+    </div>
+    
+    <div id="pause-overlay" class="overlay-simple hidden">
+      <h2>JUEGO PAUSADO</h2>
+    </div>
+  </div>
+
+  <ul class="copyright">
+    <li style="
+    font-size: 0.8em;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 15px;">&copy;Todos los derechos reservado </li>
+  </ul>
+  
+  <script src="game.js" defer></script>
+</body>
+</html>
