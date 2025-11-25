@@ -1,4 +1,4 @@
-// game.js
+// game.js 
 
 document.addEventListener("DOMContentLoaded", () => {
   
@@ -65,15 +65,15 @@ document.addEventListener("DOMContentLoaded", () => {
   let timerIntervalId;
   let timeLeft = INITIAL_TIME_PER_LEVEL;
   
-  // --- SISTEMA DE AUDIO ---
+  // --- SISTEMA DE AUDIO (Rutas corregidas con ./) ---
   const audioCtx = {
-    menuMusic: new Audio('sonidos/menuMusic.mp3'),
-    gameMusic: new Audio('sonidos/gameMusic.mp3'),
-    comer: new Audio('sonidos/comer.mp3'),
-    //dano: new Audio('sonidos/dano.mp3'),
-    powerup: new Audio('sonidos/powerup.mp3'),
-    //win: new Audio('sonidos/win.mp3'),
-    gameover: new Audio('sonidos/gameover.mp3')
+    menuMusic: new Audio('./sonidos/menuMusic.mp3'),
+    gameMusic: new Audio('./sonidos/gameMusic.mp3'),
+    comer: new Audio('./sonidos/comer.mp3'),
+    //dano: new Audio('./sonidos/dano.mp3'),
+    powerup: new Audio('./sonidos/powerup.mp3'),
+    //win: new Audio('./sonidos/win.mp3'),
+    gameover: new Audio('./sonidos/gameover.mp3')
   };
 
   try {
@@ -88,15 +88,19 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- 3. Funciones Principales ---
   
   function startGame(level) {
-    // --- RESETEO DE SONIDOS (IMPORTANTE) ---
+    // --- RESETEO DE SONIDOS SEGURO ---
     try {
-        // Apagamos el Game Over y quitamos el bucle
-        audioCtx.gameover.pause();
-        audioCtx.gameover.loop = false; 
-        audioCtx.gameover.currentTime = 0;
+        // Verificamos si existe antes de pausar para evitar errores
+        if(audioCtx.gameover) {
+            audioCtx.gameover.pause();
+            audioCtx.gameover.loop = false; 
+            audioCtx.gameover.currentTime = 0;
+        }
         
-        audioCtx.win.pause();
-        audioCtx.win.currentTime = 0;
+        if(audioCtx.win) {
+            audioCtx.win.pause();
+            audioCtx.win.currentTime = 0;
+        }
     } catch(e){}
     // ---------------------------------------
 
@@ -141,13 +145,17 @@ document.addEventListener("DOMContentLoaded", () => {
     clearInterval(gameLoopId);
     clearInterval(timerIntervalId); 
     
-    // Apagar Game Over si volvemos al menú
+    // Apagar sonidos de forma segura
     try {
-        audioCtx.gameover.pause();
-        audioCtx.gameover.loop = false; 
-        audioCtx.gameover.currentTime = 0;
-        audioCtx.win.pause();
-        audioCtx.win.currentTime = 0;
+        if(audioCtx.gameover) {
+            audioCtx.gameover.pause();
+            audioCtx.gameover.loop = false; 
+            audioCtx.gameover.currentTime = 0;
+        }
+        if(audioCtx.win) {
+            audioCtx.win.pause();
+            audioCtx.win.currentTime = 0;
+        }
     } catch(e){}
 
     cambiarMusica("menu");
@@ -305,8 +313,11 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if(!isMuted) {
         try {
-            audioCtx.win.currentTime = 0;
-            audioCtx.win.play().catch(e=>{});
+            // Protección: Solo intenta reproducir 'win' si existe en audioCtx
+            if (audioCtx.win) {
+                audioCtx.win.currentTime = 0;
+                audioCtx.win.play().catch(e=>{});
+            }
         } catch(e){}
       }
 
@@ -475,9 +486,13 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if(!isMuted) {
         // --- BUCLE DE GAME OVER ---
-        audioCtx.gameover.loop = true; 
-        audioCtx.gameover.currentTime = 0;
-        audioCtx.gameover.play().catch(e=>{});
+        try {
+            if (audioCtx.gameover) {
+                audioCtx.gameover.loop = true; 
+                audioCtx.gameover.currentTime = 0;
+                audioCtx.gameover.play().catch(e=>{});
+            }
+        } catch(e){}
     }
 
     message.style.display = "flex";
@@ -555,8 +570,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isMuted) {
       btnMute.textContent = "🔇";
       stopMusica();
-      audioCtx.gameover.pause();
-      audioCtx.win.pause();
+      if(audioCtx.gameover) audioCtx.gameover.pause();
+      if(audioCtx.win) audioCtx.win.pause();
     } else {
       btnMute.textContent = "🔊";
       if (gameActive && !isPaused) {
