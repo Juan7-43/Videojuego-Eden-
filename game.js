@@ -15,17 +15,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const livesText = document.getElementById("lives");
   const timerDisplayText = document.getElementById("timer-display"); 
 
-  // Controles
   const gameControls = document.getElementById("game-controls");
   const btnPause = document.getElementById("btn-pause");
   const btnRestartGame = document.getElementById("btn-restart-game");
   const btnSalirJuego = document.getElementById("btn-salir-juego");
   
-  // Audio UI
   const btnMute = document.getElementById("btn-mute");
   const volumenSlider = document.getElementById("volumen-slider");
 
-  // Mensajes y Menús
   const message = document.getElementById("message");
   const messageTitle = document.getElementById("message-title");
   const messageText = document.getElementById("message-text");
@@ -70,16 +67,15 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // --- SISTEMA DE AUDIO ---
   const audioCtx = {
-    menuMusic: new Audio('sonidos/musica_menu.mp3'),
+    menuMusic: new Audio('sonidos/menuMusic.mp3'),
     gameMusic: new Audio('sonidos/gameMusic.mp3'),
-    comer: new Audio('sonidos/comer.mp3'),
+    comer: new Audio('sonidos/apple.mp3'),
     dano: new Audio('sonidos/dano.mp3'),
-    powerup: new Audio('sonidos/powerup.mp3'),
+    powerup: new Audio('sonidos/RELOJ.mp3'),
     win: new Audio('sonidos/win.mp3'),
     gameover: new Audio('sonidos/gameover.mp3')
   };
 
-  // Configuración inicial
   try {
       audioCtx.menuMusic.loop = true;
       audioCtx.menuMusic.volume = 0.3;
@@ -92,15 +88,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- 3. Funciones Principales ---
   
   function startGame(level) {
-    // --- ARREGLO DE SONIDO ---
-    // Forzamos el silencio de los audios largos antes de empezar
+    // --- RESETEO DE SONIDOS (IMPORTANTE) ---
     try {
+        // Apagamos el Game Over y quitamos el bucle
         audioCtx.gameover.pause();
+        audioCtx.gameover.loop = false; 
         audioCtx.gameover.currentTime = 0;
+        
         audioCtx.win.pause();
         audioCtx.win.currentTime = 0;
     } catch(e){}
-    // -------------------------
+    // ---------------------------------------
 
     gameActive = true;
     isPaused = false;
@@ -143,9 +141,10 @@ document.addEventListener("DOMContentLoaded", () => {
     clearInterval(gameLoopId);
     clearInterval(timerIntervalId); 
     
-    // Parar sonidos persistentes también al ir al menú
+    // Apagar Game Over si volvemos al menú
     try {
         audioCtx.gameover.pause();
+        audioCtx.gameover.loop = false; 
         audioCtx.gameover.currentTime = 0;
         audioCtx.win.pause();
         audioCtx.win.currentTime = 0;
@@ -235,8 +234,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
   }
 
-  // --- Funciones de Juego ---
-
   function spawnApples() {
     apples = []; 
     for (let i = 0; i < totalApples; i++) {
@@ -282,27 +279,35 @@ document.addEventListener("DOMContentLoaded", () => {
     apples = apples.filter(a => a !== null);
   }
   
+  // --- DETECCIÓN DE VICTORIA MEJORADA ---
   function checkWin() {
     const playerRect = player.getBoundingClientRect();
     const treeRect = tree.getBoundingClientRect();
 
-    if (
-      applesCollected === totalApples &&
+    const tocaArbol = (
       playerRect.left < treeRect.right &&
       playerRect.right > treeRect.left &&
       playerRect.top < treeRect.bottom &&
       playerRect.bottom > treeRect.top
-    ) {
+    );
+
+    if (tocaArbol) {
+      // Solo ganamos si tenemos todas las manzanas
+      if (applesCollected < totalApples) {
+         return; 
+      }
+
       gameActive = false;
       clearInterval(gameLoopId);
       clearInterval(timerIntervalId); 
       
       stopMusica(); 
       
-      // ARREGLO: Usar audio directo para poder pararlo luego
       if(!isMuted) {
-        audioCtx.win.currentTime = 0;
-        audioCtx.win.play().catch(e=>{});
+        try {
+            audioCtx.win.currentTime = 0;
+            audioCtx.win.play().catch(e=>{});
+        } catch(e){}
       }
 
       message.style.display = "flex";
@@ -468,8 +473,9 @@ document.addEventListener("DOMContentLoaded", () => {
     clearInterval(timerIntervalId); 
     stopMusica(); 
     
-    // ARREGLO: Usar audio directo para el GameOver
     if(!isMuted) {
+        // --- BUCLE DE GAME OVER ---
+        audioCtx.gameover.loop = true; 
         audioCtx.gameover.currentTime = 0;
         audioCtx.gameover.play().catch(e=>{});
     }
@@ -504,8 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
     startGame(currentLevel);
   }
 
-  // --- Funciones de Audio Inteligentes ---
-  
+  // --- Funciones de Audio ---
   function reproducirSonido(efecto) {
     if (isMuted) return;
     try {
@@ -550,7 +555,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isMuted) {
       btnMute.textContent = "🔇";
       stopMusica();
-      // También parar sonidos largos
       audioCtx.gameover.pause();
       audioCtx.win.pause();
     } else {
@@ -563,8 +567,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- 5. Event Listeners ---
-  
+  // --- Event Listeners ---
   function showHelpMenu() {
     mainMenu.classList.add("hidden");
     helpMenu.classList.remove("hidden");
@@ -592,7 +595,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("keydown", (e) => {
     if (document.activeElement.tagName === "INPUT") document.activeElement.blur();
-    
     if (!gameActive || isPaused) {
       if (e.key === "p" || e.key === "P") togglePause();
       return;
@@ -607,7 +609,6 @@ document.addEventListener("DOMContentLoaded", () => {
     movePlayer();
   });
 
-  // Parche Autoplay: Música menú al primer clic
   document.body.addEventListener('click', () => {
     if (!gameActive && audioCtx.menuMusic.paused && !isMuted) {
        cambiarMusica("menu");

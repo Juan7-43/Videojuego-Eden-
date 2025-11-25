@@ -9,7 +9,6 @@
 }
 
 body {
-  /* El fondo base es el del menú principal. Cambiará dinámicamente en JS */
   background: linear-gradient(to bottom, #9be15d, #00e3ae);
   display: flex;
   flex-direction: column;
@@ -19,7 +18,7 @@ body {
   color: #fff;
   overflow: hidden;
   text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
-  transition: background 1s ease; /* Transición suave para cambio de ambiente */
+  transition: background 1s ease;
 }
 
 h1 {
@@ -33,10 +32,10 @@ h1 {
 /* --- Controles del Juego --- */
 #game-controls {
   display: flex;
-  justify-content: center; /* Centrado */
+  justify-content: center;
   align-items: center;
   gap: 10px;
-  width: 900px; /* Más ancho para acomodar audio */
+  width: 900px;
   margin-top: 10px;
 }
 
@@ -54,7 +53,7 @@ h1 {
 #btn-salir-juego { background: #dc3545; color: #fff; }
 #btn-salir-juego:hover { background: #c82333; }
 
-/* --- NUEVO: Estilos de Audio --- */
+/* --- Audio UI --- */
 .audio-controls {
   display: flex;
   align-items: center;
@@ -66,7 +65,7 @@ h1 {
 }
 
 #btn-mute {
-  background: #17a2b8 !important; /* Color azul cian */
+  background: #17a2b8 !important;
   color: #fff !important;
   min-width: 45px;
   display: flex;
@@ -93,7 +92,7 @@ h1 {
   cursor: pointer;
 }
 
-/* --- Estilos del Juego (HUD y Tablero) --- */
+/* --- Juego --- */
 #hud {
   display: flex;
   justify-content: space-between;
@@ -116,12 +115,10 @@ h1 {
   overflow: hidden;
   box-shadow: 0 0 20px rgba(0,0,0,0.4);
   margin-top: 10px;
-  /* Fondo semitransparente con efecto blur para ver el ambiente detrás */
   background-color: rgba(255, 255, 255, 0.15); 
   backdrop-filter: blur(3px); 
 }
 
-/* JUGADOR COMO IMAGEN PNG (Original) */
 #player {
   position: absolute;
   width: 50px;
@@ -134,7 +131,6 @@ h1 {
   z-index: 10;
 }
 
-/* Elementos del juego */
 .apple, .power-up {
   position: absolute;
   font-size: 30px;
@@ -167,7 +163,7 @@ h1 {
   100% { transform: translateY(0px); }
 }
 
-/* --- NUEVO: Estilos del Árbol Mejorado --- */
+/* --- Árbol --- */
 #tree {
   position: absolute;
   width: 100px;
@@ -177,20 +173,18 @@ h1 {
   background: url('https://www.opengameart.org/sites/default/files/tree_0.png') center/cover;
   image-rendering: pixelated;
   z-index: 8;
-  /* Animación suave para crecimiento y brillo */
   transition: transform 0.5s, filter 0.5s; 
-  transform-origin: bottom center; /* Crece hacia arriba */
+  transform-origin: bottom center; 
 }
 
-/* Clase que se activa cuando tienes todas las manzanas */
 #tree.tree-ready {
   filter: drop-shadow(0 0 15px #ffd700) brightness(1.3); /* Brillo dorado */
-  animation: treePulse 0.8s infinite alternate; /* Latido */
+  animation: treePulse 0.8s infinite alternate;
 }
 
 @keyframes treePulse {
-  0% { transform: scale(1); } /* El JS define la escala base */
-  100% { transform: scale(1.1); } /* Aumenta un 10% al latir */
+  0% { transform: scale(1); } 
+  100% { transform: scale(1.1); } 
 }
 
 /* --- Mensajes y Menús --- */
@@ -220,9 +214,7 @@ h1 {
   color: #ff6b6b;
   text-shadow: 3px 3px 0px #5e0000;
 }
-
 #message p { font-size: 1.2em; margin-bottom: 30px; line-height: 1.5; }
-
 #message button {
   padding: 12px 25px;
   border: none;
@@ -239,7 +231,6 @@ h1 {
 #restart-level-btn { background: #ffc107; color: #333; }
 #restart-level-btn:hover { background: #e0a800; }
 
-/* --- Estilos de Menús --- */
 .hidden { display: none !important; }
 
 .overlay {
@@ -255,7 +246,6 @@ h1 {
   flex-direction: column;
   z-index: 100;
 }
-
 .overlay-simple {
   position: absolute;
   width: 100%;
@@ -269,10 +259,7 @@ h1 {
   z-index: 50;
   color: #fff;
 }
-.overlay-simple h2 {
-  font-size: 3em;
-  text-shadow: 4px 4px 0px rgba(0,0,0,0.5);
-}
+.overlay-simple h2 { font-size: 3em; text-shadow: 4px 4px 0px rgba(0,0,0,0.5); }
 
 #main-menu h1 {
   font-size: 4em;
@@ -281,7 +268,6 @@ h1 {
   color: #a7f0ba;
   text-shadow: 5px 5px 0px #2a572a;
 }
-
 .menu-buttons button {
   padding: 18px 35px;
   border: none;
@@ -296,10 +282,7 @@ h1 {
   min-width: 250px;
   box-shadow: 3px 3px 0px rgba(0,0,0,0.5);
 }
-.menu-buttons button:hover {
-  background: #218838;
-  transform: scale(1.08);
-}
+.menu-buttons button:hover { background: #218838; transform: scale(1.08); }
 
 .menu-card {
   background: #fff;
