@@ -69,10 +69,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const audioCtx = {
     menuMusic: new Audio('sonidos/menuMusic.mp3'),
     gameMusic: new Audio('sonidos/gameMusic.mp3'),
-    comer: new Audio('sonidos/apple.mp3'),
-    dano: new Audio('sonidos/dano.mp3'),
-    powerup: new Audio('sonidos/RELOJ.mp3'),
-    win: new Audio('sonidos/win.mp3'),
+    comer: new Audio('sonidos/comer.mp3'),
+    //dano: new Audio('sonidos/dano.mp3'),
+    powerup: new Audio('sonidos/powerup.mp3'),
+    //win: new Audio('sonidos/win.mp3'),
     gameover: new Audio('sonidos/gameover.mp3')
   };
 
