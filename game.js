@@ -65,48 +65,47 @@ document.addEventListener("DOMContentLoaded", () => {
     let timerIntervalId;
     let timeLeft = INITIAL_TIME_PER_LEVEL;
     
-    // ======================================================
-    // --- SISTEMA DE AUDIO PROFESIONAL (ROBUSTO) ---
+   // ======================================================
+    // --- SISTEMA DE AUDIO CORREGIDO ---
     // ======================================================
     
-    // Definimos las rutas. Asegúrate que en GitHub la carpeta sea 'sonidos' (minúscula)
+    // CORRECCIÓN: He cambiado './sonidos/' a './Sonidos/' (Mayúscula)
+    // GitHub diferencia mayúsculas. Si tu carpeta es "Sonidos", esto lo arregla.
     const soundPaths = {
-        menuMusic: './sonidos/menuMusic.mp3',
-        gameMusic: './sonidos/gameMusic.mp3',
-        comer: './sonidos/comer.mp3',
-        powerup: './sonidos/powerup.mp3',
-        gameover: './sonidos/gameover.mp3',
-        // Descomenta si subes estos archivos:
-        // dano: './sonidos/dano.mp3', 
-        // win: './sonidos/win.mp3'
+        menuMusic: './Sonidos/menuMusic.mp3', 
+        gameMusic: './Sonidos/gameMusic.mp3',
+        comer: './Sonidos/comer.mp3',
+        powerup: './Sonidos/powerup.mp3',
+        gameover: './Sonidos/gameover.mp3',
+        // dano: './Sonidos/dano.mp3', 
+        // win: './Sonidos/win.mp3'
     };
 
-    const audioCtx = {}; // Aquí guardaremos los objetos Audio cargados
+    const audioCtx = {}; 
     let isMuted = false;
 
-    // Función para cargar sonidos y detectar errores de ruta/carga
+    // Función para cargar sonidos
     function initAudio() {
         Object.keys(soundPaths).forEach(key => {
             const audio = new Audio(soundPaths[key]);
             
-            // Configuración base
-            audio.preload = 'auto'; // Intentar cargar inmediatamente
+            audio.preload = 'auto'; 
             if (key.includes('Music')) {
                 audio.loop = true;
                 audio.volume = 0.3;
             }
 
-            // Listener de ERROR: Esto te dirá en consola si GitHub no encuentra el archivo
+            // Si falla con mayúscula, intentamos avisar en consola
             audio.addEventListener('error', (e) => {
-                console.error(`❌ ERROR AUDIO '${key}': No se pudo cargar.`);
-                console.error(`   Ruta intentada: ${audio.src}`);
-                console.warn(`   Verifica: 1. Que el archivo exista en GitHub. 2. Mayúsculas/Minúsculas en carpeta 'sonidos'.`);
+                console.error(`❌ Falló la carga de: ${key}. Ruta: ${audio.src}`);
+                console.warn("👉 SI ESTO FALLA: Significa que tus archivos de audio NO están en una carpeta llamada 'Sonidos'.");
+                console.warn("   Opción A: ¿Están sueltos junto al index.html? -> Quita 'Sonidos/' de la ruta en el código.");
+                console.warn("   Opción B: ¿La carpeta es minúscula? -> Asegúrate de que en GitHub se llame 'sonidos'.");
             });
 
             audioCtx[key] = audio;
         });
     }
-
     // Inicializamos el sistema de audio
     initAudio();
 
