@@ -95,7 +95,9 @@ document.addEventListener("DOMContentLoaded", () => {
         audioCtx.gameover.loop = false; 
         audioCtx.gameover.currentTime = 0;
         
+        // Apagamos el Win y quitamos el bucle (MODIFICADO)
         audioCtx.win.pause();
+        audioCtx.win.loop = false; // <--- Se asegura de que no siga en loop al iniciar nivel
         audioCtx.win.currentTime = 0;
     } catch(e){}
     // ---------------------------------------
@@ -141,12 +143,14 @@ document.addEventListener("DOMContentLoaded", () => {
     clearInterval(gameLoopId);
     clearInterval(timerIntervalId); 
     
-    // Apagar Game Over si volvemos al menú
+    // Apagar Game Over y Win si volvemos al menú
     try {
         audioCtx.gameover.pause();
         audioCtx.gameover.loop = false; 
         audioCtx.gameover.currentTime = 0;
+        
         audioCtx.win.pause();
+        audioCtx.win.loop = false; // <--- Se asegura de quitar el loop al salir
         audioCtx.win.currentTime = 0;
     } catch(e){}
 
@@ -305,6 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if(!isMuted) {
         try {
+            audioCtx.win.loop = true; // <--- MODIFICADO: Activamos el loop
             audioCtx.win.currentTime = 0;
             audioCtx.win.play().catch(e=>{});
         } catch(e){}
